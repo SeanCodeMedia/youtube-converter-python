@@ -39,8 +39,9 @@ class MainApplication:
 
     def draw(self):
         with dpg.window(label="Example Window", width=self.current_viewport_width,
-                        height=self.current_viewport_height, no_title_bar=True, no_resize=True, no_move=True):
-            with dpg.menu_bar(label="Menu_Bar", tag="Menu_bar_tag"):
+                        height=self.current_viewport_height, no_title_bar=True, no_resize=True, no_move=True,
+                        tag="main_window"):
+            with dpg.menu_bar(label="Menu_Bar", tag="Menu_bar_tag", parent="main_window"):
                 with dpg.menu(label="File"):
                     dpg.add_menu_item(label="Open Download Location", callback=self.menu_callback())
 

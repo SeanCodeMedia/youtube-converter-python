@@ -14,7 +14,7 @@ class MainApplication:
     def __init__(self):
         dpg.create_context()
 
-        self.youtube_manager = YouTubeManager()
+        self.youtube_manager = YouTubeManager(dpg)
 
         image_loader("data/images/logo.png", "logo")
 
@@ -32,15 +32,15 @@ class MainApplication:
     def convert(self):
         dpg.hide_item("url_tag")
         dpg.hide_item("convert_button")
-        dpg.show_item("convert_bar")
-        dpg.show_item("process_text")
+        dpg.show_item("progress_bar")
+        dpg.show_item("progress_text")
         url = dpg.get_value("url_tag")
-        # self.youtube_manager.download(url)
+        self.youtube_manager.download(url)
 
     def draw(self):
         with dpg.window(label="Example Window", width=self.current_viewport_width,
                         height=self.current_viewport_height, no_title_bar=True, no_resize=True, no_move=True):
-            with dpg.menu_bar():
+            with dpg.menu_bar(label="Menu_Bar", tag="Menu_bar_tag"):
                 with dpg.menu(label="File"):
                     dpg.add_menu_item(label="Open Download Location", callback=self.menu_callback())
 
@@ -55,13 +55,13 @@ class MainApplication:
             dpg.add_image("logo", width=350, height=300, pos=[self.current_viewport_width // 3,
                                                               (self.current_viewport_height // 2) - 300])
 
-            dpg.add_progress_bar(tag="convert_bar", width=350, show=False, pos=[
+            dpg.add_progress_bar(tag="progress_bar", width=350, show=False, pos=[
                 (self.current_viewport_width // 3) - 4,
                 (self.current_viewport_height // 2) + 80])
 
             dpg.add_text(default_value="Downloading Video...", pos=[
                 self.current_viewport_width // 3,
-                (self.current_viewport_height // 2) + 30], show=False, tag="process_text")
+                (self.current_viewport_height // 2) + 30], show=False, tag="progress_text")
 
             dpg.add_input_text(tag="url_tag", label="Video URL", default_value="https://music.youtube.com/watch?v="
                                                                                "b1HsNByXsdc&list=RDAMVMb1HsNByXsdc",

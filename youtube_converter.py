@@ -3,9 +3,7 @@ from moviepy.editor import VideoFileClip
 import os
 import time
 
-video_file = "data/temp/temp_video.mp4"
-output_ext = "mp3"
-filename = "data/temp/done_temp_"
+
 
 
 class YouTubeManager:
@@ -13,7 +11,8 @@ class YouTubeManager:
     def __init__(self):
 
         self.media_format = "MP3"
-        self.clip = VideoFileClip(video_file)
+        self.clip = None
+
 
     # todo   create settings object that holds all the states of the app such as user settings
 
@@ -23,19 +22,17 @@ class YouTubeManager:
 
     def callback(self):
         print("deleting file")
+        self.clip.close()
         os.remove("data/temp/temp_video.mp4")
         print("done delete video")
 
     def on_done(self, something, something_2):
-
-
-        clip.audio.write_audiofile(f"{filename}.{output_ext}", self.callback)
-        clip.reader.close()
-        clip.close()
-        del clip.reader
-        del clip
-        clip.__del__()
-        clip.reader.__del__()
+        # check what media format we need to convert to
+        video_file = "data/temp/temp_video.mp4"
+        output_ext = "mp3"
+        filename = "data/temp/done_temp_"
+        self.clip = VideoFileClip(video_file)
+        self.clip.audio.write_audiofile(f"{filename}.{output_ext}", self.callback)
 
 
 

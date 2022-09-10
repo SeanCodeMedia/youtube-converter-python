@@ -30,8 +30,12 @@ class MainApplication:
         print(self.current_viewport_width)
 
     def convert(self):
+        dpg.hide_item("url_tag")
+        dpg.hide_item("convert_button")
+        dpg.show_item("convert_bar")
+        dpg.show_item("process_text")
         url = dpg.get_value("url_tag")
-        self.youtube_manager.download(url)
+        # self.youtube_manager.download(url)
 
     def draw(self):
         with dpg.window(label="Example Window", width=self.current_viewport_width,
@@ -51,6 +55,14 @@ class MainApplication:
             dpg.add_image("logo", width=350, height=300, pos=[self.current_viewport_width // 3,
                                                               (self.current_viewport_height // 2) - 300])
 
+            dpg.add_progress_bar(tag="convert_bar", width=350, show=False, pos=[
+                (self.current_viewport_width // 3) - 4,
+                (self.current_viewport_height // 2) + 80])
+
+            dpg.add_text(default_value="Downloading Video...", pos=[
+                self.current_viewport_width // 3,
+                (self.current_viewport_height // 2) + 30], show=False, tag="process_text")
+
             dpg.add_input_text(tag="url_tag", label="Video URL", default_value="https://music.youtube.com/watch?v="
                                                                                "b1HsNByXsdc&list=RDAMVMb1HsNByXsdc",
                                width=dpg.get_viewport_width() // 2, pos=[self.current_viewport_width // 4,
@@ -58,8 +70,9 @@ class MainApplication:
                                                                                  self.current_viewport_height //
                                                                                  2) + 30])
 
-            dpg.add_button(label="Convert", pos=[self.current_viewport_width // 2,
-                                                 (self.current_viewport_height // 2) + 80], callback=self.convert)
+            dpg.add_button(tag="convert_button", label="Convert", pos=[self.current_viewport_width // 2,
+                                                                       (self.current_viewport_height // 2) + 80],
+                           callback=self.convert)
 
             dpg.render_dearpygui_frame()
 

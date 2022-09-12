@@ -93,7 +93,60 @@ class MainWindow(QMainWindow):
         # after everything is created we pass to the YouTube manager
 
     def convert(self):
+<<<<<<< HEAD
         pass
+=======
+        dpg.hide_item("url_tag")
+        dpg.hide_item("convert_button")
+        dpg.show_item("progress_bar")
+        dpg.show_item("progress_text")
+        url = dpg.get_value("url_tag")
+        self.youtube_manager.download(url)
+
+    def draw(self):
+        with dpg.window(label="Example Window", width=self.current_viewport_width,
+                        height=self.current_viewport_height, no_title_bar=True, no_resize=True, no_move=True,
+                        tag="main_window"):
+            with dpg.menu_bar(label="Menu_Bar", tag="Menu_bar_tag", parent="main_window"):
+                with dpg.menu(label="File"):
+                    dpg.add_menu_item(label="Open Download Location", callback=self.menu_callback())
+
+                with dpg.menu(label="Settings"):
+                    dpg.add_menu_item(label="File Format", callback=self.menu_callback())
+                    dpg.add_menu_item(label="Set Download Location", callback=self.menu_callback())
+
+                with dpg.menu(label="Help"):
+                    dpg.add_menu_item(label="Version", callback=self.menu_callback())
+                    dpg.add_menu_item(label="About", callback=self.menu_callback())
+
+            dpg.add_image("logo", width=350, height=300, pos=[self.current_viewport_width // 3,
+                                                              (self.current_viewport_height // 2) - 300])
+
+            dpg.add_progress_bar(tag="progress_bar", width=350, show=False, pos=[
+                (self.current_viewport_width // 3) - 4,
+                (self.current_viewport_height // 2) + 80])
+
+            dpg.add_text(default_value="Downloading Video...", pos=[
+                self.current_viewport_width // 3,
+                (self.current_viewport_height // 2) + 30], show=False, tag="progress_text")
+
+            dpg.add_input_text(tag="url_tag", label="Video URL", default_value="https://music.youtube.com/watch?v="
+                                                                               "b1HsNByXsdc&list=RDAMVMb1HsNByXsdc",
+                               width=dpg.get_viewport_width() // 2, pos=[self.current_viewport_width // 4,
+                                                                         (
+                                                                                 self.current_viewport_height //
+                                                                                 2) + 30])
+
+            dpg.add_button(tag="convert_button", label="Convert", pos=[self.current_viewport_width // 2,
+                                                                       (self.current_viewport_height // 2) + 80],
+                           callback=self.convert)
+
+            dpg.render_dearpygui_frame()
+
+    def destory(self):
+        dpg.start_dearpygui()
+        dpg.destroy_context()
+>>>>>>> 0986e82e5acb7b663975e0edd6df4b4d470ee79a
 
 
 ############## Style

@@ -3,6 +3,7 @@ from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from waitingspinnerwidget import QtWaitingSpinner
 import sys
+import requests
 from youtube_converter import YouTubeManager
 
 
@@ -14,6 +15,8 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("YouTube Converter")
         self.setGeometry(100, 100, 1000, 600)
         self.setStyleSheet("background-color: #2c3e50;")
+        self.object_dict = {}
+
 
         # toolbar
         # self.statusBar()
@@ -38,14 +41,16 @@ class MainWindow(QMainWindow):
             }
         """)
 
+        # menu bar
         file_menu = self.menu_bar.addMenu('&File')
         file_menu.addAction("Open Download Location")
         settings = self.menu_bar.addMenu("Settings")
+        settings.addAction("Set Download Location")
         help = self.menu_bar.addMenu("Help")
+        help.addAction("About")
+        help.addAction("Version")
 
-        # fileMenu.addAction(exitAct)
-
-        # loading image
+        # loading widget
         self.spinner = QtWaitingSpinner(self)
         self.spinner.setRoundness(70.0)
         self.spinner.setMinimumTrailOpacity(15.0)
@@ -59,10 +64,23 @@ class MainWindow(QMainWindow):
         self.spinner.start()
         self.spinner.hide()
 
+        # logo image
         self.logo = QLabel()
         self.logo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.pixmap = QPixmap('logo.png')
         self.logo.setPixmap(self.pixmap.scaled(400, 300))
+
+        # thumbnail
+
+        self.url = 'https://www.techsmith.com/blog/wp-content/uploads/2019/06/YouTube-Thumbnail-Sizes.png'
+        self.thumbnail_image_data = QImage()
+        self.thumbnail_image_data.loadFromData(requests.get(self.url).content)
+        self.thumbnail_image = QLabel()
+        self.thumbnail_image.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.thumbnail_image.setPixmap(QPixmap(self.thumbnail_image_data).scaled(300, 200))
+        self.thumbnail_image.show()
+
+        # text input
         self.text_box = QLineEdit()
         self.text_box.setText("https://music.youtube.com/watch?v=b1HsNByXsdc&list=RDAMVMb1HsNByXsdc")
         self.text_box.setStyleSheet("background-color: White")
@@ -77,79 +95,40 @@ class MainWindow(QMainWindow):
         self.convert_button.setStyleSheet("background-color: White")
         self.convert_button.clicked.connect(self.convert)
 
+        self.stack_layout = QStackedLayout()
+        self.stack_layout.addWidget(self.logo)
+        self.stack_layout.addWidget(self.thumbnail_image)
+        self.stack_layout.setCurrentIndex(0)
+
         self.layout = QVBoxLayout()
-        self.layout.addWidget(self.logo)
+        self.layout.addLayout(self.stack_layout)
         self.layout.addWidget(self.text_box)
         self.layout.addWidget(self.status_label)
-        self.layout.addWidget(self.spinner)
         self.layout.addWidget(self.convert_button)
-        self.layout.setContentsMargins(200, 0, 200, 0)
+        self.layout.setContentsMargins(200, 100, 200, 200)
+        self.layout.addWidget(self.spinner)
         self.layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         widget = QWidget()
         widget.setLayout(self.layout)
         self.setCentralWidget(widget)
 
-        # after everything is created we pass to the YouTube manager
+        self.object_dict["stack_layout"] = self.stack_layout
+        self.object_dict["thumbnail_image_data"] = self.thumbnail_image_data
+        self.object_dict["thumbnail_image"] = self.thumbnail_image
+        self.object_dict["status_label"] = self.status_label
+        self.object_dict["spinner"] = self.spinner
+        self.object_dict["convert_button"] = self.convert_button
+        self.object_dict["text_box"] = self.text_box
+        self.object_dict["logo"] = self.logo
+        self.youtube_manager = YouTubeManager(self.object_dict)
 
     def convert(self):
-<<<<<<< HEAD
-        pass
-=======
-        dpg.hide_item("url_tag")
-        dpg.hide_item("convert_button")
-        dpg.show_item("progress_bar")
-        dpg.show_item("progress_text")
-        url = dpg.get_value("url_tag")
+        url = self.text_box.text()
         self.youtube_manager.download(url)
 
-    def draw(self):
-        with dpg.window(label="Example Window", width=self.current_viewport_width,
-                        height=self.current_viewport_height, no_title_bar=True, no_resize=True, no_move=True,
-                        tag="main_window"):
-            with dpg.menu_bar(label="Menu_Bar", tag="Menu_bar_tag", parent="main_window"):
-                with dpg.menu(label="File"):
-                    dpg.add_menu_item(label="Open Download Location", callback=self.menu_callback())
 
-                with dpg.menu(label="Settings"):
-                    dpg.add_menu_item(label="File Format", callback=self.menu_callback())
-                    dpg.add_menu_item(label="Set Download Location", callback=self.menu_callback())
-
-                with dpg.menu(label="Help"):
-                    dpg.add_menu_item(label="Version", callback=self.menu_callback())
-                    dpg.add_menu_item(label="About", callback=self.menu_callback())
-
-            dpg.add_image("logo", width=350, height=300, pos=[self.current_viewport_width // 3,
-                                                              (self.current_viewport_height // 2) - 300])
-
-            dpg.add_progress_bar(tag="progress_bar", width=350, show=False, pos=[
-                (self.current_viewport_width // 3) - 4,
-                (self.current_viewport_height // 2) + 80])
-
-            dpg.add_text(default_value="Downloading Video...", pos=[
-                self.current_viewport_width // 3,
-                (self.current_viewport_height // 2) + 30], show=False, tag="progress_text")
-
-            dpg.add_input_text(tag="url_tag", label="Video URL", default_value="https://music.youtube.com/watch?v="
-                                                                               "b1HsNByXsdc&list=RDAMVMb1HsNByXsdc",
-                               width=dpg.get_viewport_width() // 2, pos=[self.current_viewport_width // 4,
-                                                                         (
-                                                                                 self.current_viewport_height //
-                                                                                 2) + 30])
-
-            dpg.add_button(tag="convert_button", label="Convert", pos=[self.current_viewport_width // 2,
-                                                                       (self.current_viewport_height // 2) + 80],
-                           callback=self.convert)
-
-            dpg.render_dearpygui_frame()
-
-    def destory(self):
-        dpg.start_dearpygui()
-        dpg.destroy_context()
->>>>>>> 0986e82e5acb7b663975e0edd6df4b4d470ee79a
-
-
-############## Style
+# ------------------Style
 
 qss = """
 QMenuBar {
@@ -188,6 +167,7 @@ QMenu::item:selected {
 
 app = QApplication(sys.argv)
 window = MainWindow()
+
 # window.setStyleSheet(qss)
 window.show()
 # Start the event loop.

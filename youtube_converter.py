@@ -6,25 +6,27 @@ from pytube import YouTube
 from moviepy.editor import VideoFileClip
 from PyQt6.QtGui import *
 import requests
-import threading
+from concurrent.futures import ThreadPoolExecutor
+from PyQt6.QtCore import QRunnable,QThreadPool
 
 
-class DownloadThread(threading.Thread):
+# https://www.pythontutorial.net/python-concurrency/python-threadpoolexecutor/
 
-    def __init__(self):
-        pass
+
+# def thread_pool_handler(method_name):
+#     with ThreadPoolExecutor() as executor:
+#         task = executor.submit(method_name)
+
+
+class AppThreadPool(QRunnable):
+
+    def __init__(self, fun):
+        super(AppThreadPool, self).__init__()
+        self.fun = fun
 
     def run(self):
-        pass
+        self.fun()
 
-
-class AudioExtraction(threading.Thread):
-
-    def __init__(self):
-        pass
-
-    def run(self):
-        pass
 
 
 class YouTubeManager:
@@ -36,8 +38,7 @@ class YouTubeManager:
         self.thumbnail_url = None
         self.url = None
         self.py_qt_widgets = py_qt_widgets
-        self.download_thread = threading.Thread(target=self.download_from_youtube_thread)
-        self.audio_extraction_thread = threading.Thread(target=self.extract_audio)
+        self.threadpool = QThreadPool()
 
     # todo   create settings object that holds all the states of the app such as user settings
 
@@ -71,7 +72,10 @@ class YouTubeManager:
 
     def on_complete(self):
         print("deleting file")
+        self.py_qt_widgets.get("bottom_status_label").setText("Cleaning up....")
+        self.py_qt_widgets.get("bottom_status_label").setStyleSheet("color: yellow")
         self.clip.close()
+        time.sleep(5)
         os.remove(f"data/temp/{self.video_title}.MP4")
 
         # todo manage for mp4 only
@@ -84,9 +88,14 @@ class YouTubeManager:
         self.py_qt_widgets.get("status_label").hide()
         pixmap = QPixmap('data/images/logo.png')
         self.py_qt_widgets.get("logo").setPixmap(pixmap.scaled(400, 300))
+        self.py_qt_widgets.get("bottom_status_label").show()
+        self.py_qt_widgets.get("bottom_status_label").setStyleSheet("color: green")
+        self.py_qt_widgets.get("bottom_status_label").setText("Done...")
+        time.sleep(5)
+        self.py_qt_widgets.get("bottom_status_label").hide()
+        self.py_qt_widgets.get("bottom_status_label").setStyleSheet("color: white")
 
-        self.download_thread.join()
-        self.audio_extraction_thread.join()
+
 
     def on_progress_audio(self, percentage):
         pass
@@ -108,12 +117,19 @@ class YouTubeManager:
     def on_done(self, something, something_2):
         # check what media format we need to convert to
         # todo if its MP3 we do this we need to pull from the settings object
-        self.audio_extraction_thread.start()
 
-    def download_from_youtube_thread(self):
-        youtube_downloader = YouTube(self.url, self.on_progress, self.on_done).streams.filter(progressive=True,
-                                                                                              file_extension='mp4') \
-            .order_by('resolution') \
+        self.py_qt_widgets.get("bottom_status_label").setText("Extracting Audio...")
+        self.py_qt_widgets.get("bottom_status_label").setStyleSheet("color: red")
+        self.py_qt_widgets.get("bottom_status_label").show()
+
+        extract_audio_worker = AppThreadPool(self.extract_audio)
+        self.threadpool.start(extract_audio_worker)
+
+        # thread_pool_handler(self.download_video_thread)
+
+    def download_video_thread(self):
+        youtube_downloader = YouTube(self.url, self.on_progress, self.on_done) \
+            .streams.filter(progressive=True, file_extension='mp4').order_by('resolution') \
             .first().download(output_path="data/temp", filename=f"{self.video_title}.MP4")
 
     def download(self, url):
@@ -129,10 +145,17 @@ class YouTubeManager:
         self.py_qt_widgets.get("text_box").hide()
         self.py_qt_widgets.get("status_label").setText(self.video_title)
         self.py_qt_widgets.get("status_label").show()
+        self.py_qt_widgets.get("status_bar").show()
+        self.py_qt_widgets.get("bottom_status_label").setText("Downloading Video....")
+        self.py_qt_widgets.get("bottom_status_label").show()
         self.url = url
         self.load_image()
 
+        download_video_worker = AppThreadPool(self.download_video_thread)
+        self.threadpool.start(download_video_worker)
+
+
         # might be a hanging here and would need a thread in the further
         # download the thumbnail before the video
+        # thread_pool_handler(self.download_video_thread)
 
-        self.download_thread.start()

@@ -4,6 +4,8 @@ from PyQt6.QtGui import *
 from waitingspinnerwidget import QtWaitingSpinner
 import sys
 import requests
+# third party
+from settings import Settings
 from youtube_converter import YouTubeManager
 
 
@@ -15,11 +17,17 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("YouTube Converter")
         self.setGeometry(100, 100, 1000, 600)
         self.setStyleSheet("background-color: #2c3e50;")
-        self.object_dict = {}
+        self.settings = Settings()
+        self.object_id = {}
 
+        # status bar
+        self.bottom_status_label = QLabel("")
+        self.bottom_status_label.setStyleSheet("color: white")
+        self.status_bar = self.statusBar()
+        self.status_bar.hide()
+        self.status_bar.addWidget(self.bottom_status_label)
 
         # toolbar
-        # self.statusBar()
         self.menu_bar = self.menuBar()
         self.menu_bar.setStyleSheet("""
         
@@ -113,15 +121,17 @@ class MainWindow(QMainWindow):
         widget.setLayout(self.layout)
         self.setCentralWidget(widget)
 
-        self.object_dict["stack_layout"] = self.stack_layout
-        self.object_dict["thumbnail_image_data"] = self.thumbnail_image_data
-        self.object_dict["thumbnail_image"] = self.thumbnail_image
-        self.object_dict["status_label"] = self.status_label
-        self.object_dict["spinner"] = self.spinner
-        self.object_dict["convert_button"] = self.convert_button
-        self.object_dict["text_box"] = self.text_box
-        self.object_dict["logo"] = self.logo
-        self.youtube_manager = YouTubeManager(self.object_dict)
+        self.object_id["stack_layout"] = self.stack_layout
+        self.object_id["thumbnail_image_data"] = self.thumbnail_image_data
+        self.object_id["thumbnail_image"] = self.thumbnail_image
+        self.object_id["status_label"] = self.status_label
+        self.object_id["spinner"] = self.spinner
+        self.object_id["convert_button"] = self.convert_button
+        self.object_id["text_box"] = self.text_box
+        self.object_id["logo"] = self.logo
+        self.object_id["status_bar"] = self.status_bar
+        self.object_id["bottom_status_label"] = self.bottom_status_label
+        self.youtube_manager = YouTubeManager(self.object_id)
 
     def convert(self):
         url = self.text_box.text()
@@ -164,7 +174,6 @@ QMenu::item:selected {
     color: rgb(255,255,255);
 }
 """
-
 app = QApplication(sys.argv)
 window = MainWindow()
 
